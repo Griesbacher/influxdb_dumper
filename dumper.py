@@ -13,11 +13,11 @@ except ImportError:
 
 
 def handle_args():
-    parser = argparse.ArgumentParser(description='Dumps Tables from InfluxDB and writes them to a file')
+    parser = argparse.ArgumentParser(description='Dumps Tables from InfluxDB and writes them to files')
     parser.add_argument('--url',
                         dest='url',
-                        default='http://127.0.0.1:8086',
-                        help='URL to the InfluxDB with username, password...',
+                        default='http://127.0.0.1:8086?/query?db=mydb',
+                        help='URL to the InfluxDB with username, password... Default: http://127.0.0.1:8086/query?db=mydb',
                         type=str, )
     parser.add_argument('--file',
                         dest='file',
@@ -30,7 +30,7 @@ def handle_args():
                         help='List of tabelnames')
     parser.add_argument('--target',
                         dest='target',
-                        help='Target folder',
+                        help='Target folder. Default: dump',
                         default='dump',
                         type=str, )
     return parser.parse_args()
@@ -53,7 +53,7 @@ def raise_http_error(code, table):
 
 def query_data_for_table(url, table):
     table = table.replace('/', '\/').replace(' ', '\ ')
-    url += '&epoch=ms&q='
+    url += '&format=json&epoch=ms&q='
     if v == 2:
         url += urllib2.quote('SELECT * FROM /%s/' % table)
         try:
