@@ -1,14 +1,15 @@
 import argparse
 import json
 import os
-from cStringIO import StringIO
 
 try:
     import urllib2
+    from cStringIO import StringIO
 
     v = 2
 except ImportError:
     import urllib.request, urllib.error, urllib.parse
+    from io import StringIO
 
     v = 3
 
