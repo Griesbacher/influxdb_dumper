@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+from cStringIO import StringIO
 
 try:
     import urllib2
@@ -92,13 +93,20 @@ def convert_json_to_line_format(json_object):
             tags.append((index, escape_for_influxdb(v)))
     time_index = json_object['columns'].index("time")
     value_index = json_object['columns'].index("value")
-    data = ""
+    data = StringIO()
     for value in json_object['values']:
-        data += json_object['name']
+        data.write(json_object['name'])
         for tag in tags:
-            data += ',' + tag[1] + '=' + escape_for_influxdb(value[tag[0]])
-        data += ' value=' + escape_for_influxdb(value[value_index]) + ' ' + value[time_index] + '\n'
-    return data
+            data.write(',')
+            data.write(tag[1])
+            data.write('=')
+            data.write(escape_for_influxdb(value[tag[0]]))
+        data.write(' value=')
+        data.write(escape_for_influxdb(value[value_index]))
+        data.write(' ')
+        data.write(str(value[time_index]))
+        data.write('\n')
+    return data.getvalue()
 
 
 def write_data_to_file(data, target, filename):
