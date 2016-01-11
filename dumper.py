@@ -78,11 +78,12 @@ def query_data_for_table(url, table):
 def escape_for_influxdb(string):
     if isinstance(string, str):
         return string.replace(' ', '\ ').replace(',', '\,')
-    return string
+    return str(string)
 
 
 def convert_json_to_line_format(json_object):
-    if len(json_object['results']) == 0:
+    if len(json_object['results']) == 0 or len(json_object['results'][0]) == 0:
+        print("EMPTY RESULT!")
         return ""
     json_object = json_object['results'][0]['series'][0]
     tags = []
@@ -95,8 +96,8 @@ def convert_json_to_line_format(json_object):
     for value in json_object['values']:
         data += json_object['name']
         for tag in tags:
-            data += ',%s=%s' % (tag[1], escape_for_influxdb(value[tag[0]]))
-        data += ' value=%s %u\n' % (escape_for_influxdb(value[value_index]), value[time_index])
+            data += ',' + tag[1] + '=' + escape_for_influxdb(value[tag[0]])
+        data += ' value=' + escape_for_influxdb(value[value_index]) + ' ' + value[time_index] + '\n'
     return data
 
 
