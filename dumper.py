@@ -54,7 +54,7 @@ def raise_http_error(code, table):
 
 
 def query_data_for_table(url, table):
-    table = table.replace('/', '\/').replace(' ', '\ ')
+    table = escape_for_influxdb(table).replace('/', '\/').replace("\\", "\\\\")
     url += '&format=json&epoch=ms&q='
     if v == 2:
         url += urllib2.quote('SELECT * FROM /%s/' % table)
@@ -96,7 +96,7 @@ def convert_json_to_line_format(json_object):
     value_index = json_object['columns'].index("value")
     data = StringIO()
     for value in json_object['values']:
-        data.write(json_object['name'])
+        data.write(escape_for_influxdb(json_object['name']))
         for tag in tags:
             data.write(',')
             data.write(tag[1])
