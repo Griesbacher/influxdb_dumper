@@ -78,9 +78,9 @@ def query_data_for_table(url, table):
 
 
 def escape_for_influxdb(string):
-    if isinstance(string, str):
-        return string.replace(' ', '\ ').replace(',', '\,')
-    return str(string)
+    if not isinstance(string, str):
+        string = str(string)
+    return string.replace(' ', '\ ').replace(',', '\,')
 
 
 def convert_json_to_line_format(json_object):
@@ -96,14 +96,19 @@ def convert_json_to_line_format(json_object):
     value_index = json_object['columns'].index("value")
     data = StringIO()
     for value in json_object['values']:
-        data.write(escape_for_influxdb(str(json_object['name'])))
+        data.write(escape_for_influxdb(json_object['name']))
         for tag in tags:
             data.write(',')
-            data.write(tag[1])
+            data.write(escape_for_influxdb(tag[1]))
             data.write('=')
             data.write(escape_for_influxdb(value[tag[0]]))
         data.write(' value=')
-        data.write(escape_for_influxdb(value[value_index]))
+        if isinstance(value[value_index], unicode):
+            data.write('"')
+            data.write(value[value_index])
+            data.write('"')
+        else:
+            data.write(escape_for_influxdb(value[value_index]))
         data.write(' ')
         data.write(str(value[time_index]))
         data.write('\n')
